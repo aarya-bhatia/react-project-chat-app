@@ -11,20 +11,16 @@ class Chat extends React.Component {
       active: 0,
     };
 
-    this.new_message = this.new_message.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.createNewMessage = this.createNewMessage.bind(this);
     this.addMessageToChat = this.addMessageToChat.bind(this);
   }
 
-  new_message(message) {
-    console.log(message);
-    this.addMessageToChat(message);
-  }
-
   async componentDidMount() {
     // register socket event listener
-    this.props.socket.on("new_message", (message) => this.new_message(message));
+    this.props.socket.on("new_message", (message) =>
+      this.addMessageToChat(message)
+    );
 
     // fetch chats from server
     try {
@@ -83,16 +79,16 @@ class Chat extends React.Component {
   }
 
   addMessageToChat(message) {
+    console.log("adding new message.....", message);
     const chats = this.state.chats;
-    this.setState({
-      chats: chats.map((chat) => {
-        if (chat._id === message.chat_id) {
-          return Object.assign({ messages: [...chat.messages, message] }, chat);
-        } else {
-          return chat;
-        }
-      }),
-    });
+    for (let i = 0; i < chats.length; i++) {
+      if (chats[i]._id === message.chat_id) {
+        chats[i].messages.push(message);
+        break;
+      }
+    }
+    this.setState({ chats });
+    console.log("added message");
   }
 
   findContact(chat, user_id) {
@@ -114,6 +110,7 @@ class Chat extends React.Component {
 
     return (
       <ChatView
+        api={this.props.api}
         chats={this.state.chats}
         user_id={this.props.user._id}
         active={this.state.active}

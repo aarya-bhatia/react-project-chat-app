@@ -7,6 +7,7 @@ export default function MessageFom({ sendMessage }) {
     e.preventDefault();
     if (content && content.length > 0) {
       sendMessage(content);
+      setContent("");
     }
   }
 
@@ -19,6 +20,7 @@ export default function MessageFom({ sendMessage }) {
           placeholder="Aa"
           className="form-control"
           onChange={(e) => setContent(e.target.value)}
+          value={content}
         />
       </div>
     </form>

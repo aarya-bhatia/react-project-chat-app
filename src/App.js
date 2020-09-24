@@ -12,6 +12,7 @@ class App extends React.Component {
       user: null,
       loggedIn: false,
       route: "Login",
+      registered: false,
     };
     this.login = this.login.bind(this);
     this.signup = this.signup.bind(this);
@@ -39,16 +40,19 @@ class App extends React.Component {
   }
 
   async componentDidMount() {
-    const user_id = localStorage.getItem("user_id");
+    const user_id = sessionStorage.getItem("user_id");
     if (user_id) {
       try {
         const response = await fetch(`${this.props.api}/users/${user_id}`);
         if (response.ok) {
           const user = await response.json();
+          this.props.socket.emit("register", user);
+          console.log("registered", this.state.registered);
           this.setState({
             user,
             loggedIn: true,
             route: "Chat",
+            registered: true,
           });
         }
       } catch (err) {
@@ -58,7 +62,7 @@ class App extends React.Component {
   }
 
   logout() {
-    localStorage.removeItem("user_id");
+    sessionStorage.removeItem("user_id");
     this.setState({
       user: null,
       loggedIn: false,
@@ -86,15 +90,15 @@ class App extends React.Component {
         return alert(user.message);
       }
 
-      localStorage.setItem("user_id", user._id);
+      sessionStorage.setItem("user_id", user._id);
+      this.props.socket.emit("register", user);
 
       this.setState({
         user,
         loggedIn: true,
         route: "Chat",
+        registered: true,
       });
-
-      this.props.socket.emit("register", user);
     } catch (err) {
       console.log(err);
     }
@@ -102,12 +106,13 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="container">
+      <div id="App">
         <Navbar
           loggedIn={this.state.loggedIn}
           name={this.state.user ? this.state.user.name : null}
           logout={this.logout}
           signup={this.signup}
+          route={this.state.route}
         />
         {this.renderRoute()}
       </div>

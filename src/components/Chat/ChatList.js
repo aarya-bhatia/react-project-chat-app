@@ -1,25 +1,31 @@
 import React from "react";
 import ChatListItem from "./ChatListItem";
 
-export default function ChatList({ user_id, chats }) {
+export default function ChatList({ user_id, chats, current_chat_id }) {
   function createListItem(chat) {
-    const contact_name = chat.users.filter((user) => user._id !== user_id)[0]
-      .name;
-    // filter()[0] returns the first object in array
+    const contact_name = chat.users.find((user) => user._id !== user_id).name;
 
-    let content = "";
+    let content = ""; // in case there are no messages
 
     if (chat.messages.length > 0) {
       content = chat.messages.slice(-1)[0].content; // slice() returns an array
     }
 
-    const count = chat.messages.reduce((count, message) => {
-      if (message.seenBy.length === 0) {
-        return count + 1;
-      } else {
-        return count;
+    // date user last opened chat
+    const last_seen_at = chat.seenAt.find((entry) => entry.user_id === user_id)
+      .time;
+
+    // counting unread messages
+    let count = 0;
+    if (chat._id !== current_chat_id) {
+      console.log("counting");
+      for (let i = 0; i < chat.messages.length; i++) {
+        // if message was sent after user left the chat, then mark it as unread
+        if (chat.messages[i].date > last_seen_at) {
+          count++;
+        }
       }
-    }, 0);
+    }
 
     return (
       <ChatListItem
