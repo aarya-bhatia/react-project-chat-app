@@ -30,7 +30,10 @@ export default class MessagesContainer extends Component {
 
   render() {
     return (
-      <div className="chat-body p-4" style={{ maxHeight: "70vh" }}>
+      <div
+        className="chat-body p-4"
+        style={{ maxHeight: "70vh", minHeight: "70vh" }}
+      >
         {this.props.messages.map((message) => {
           if (message.author_name === this.props.contact_name) {
             return (

@@ -1,60 +1,47 @@
 import React from "react";
 
-// props = {user, name, gender, _id, country}
 export default class ContactRow extends React.Component {
   constructor(props) {
     super();
     this.props = props;
-    this.status = this.status.bind(this);
     this.action = this.action.bind(this);
+    this.commitAction = this.commitAction.bind(this);
   }
 
   commitAction(action) {
     if (action === "ADD") {
       this.props.send_friend_request({
-        user_id: this.props.user._id,
+        user_id: this.props.user_id,
         contact_id: this.props._id,
       });
     }
 
     if (action === "REMOVE") {
       this.props.remove_friend({
-        user_id: this.props.user._id,
+        user_id: this.props.user_id,
         contact_id: this.props._id,
       });
     }
 
     if (action === "ACCEPT") {
       this.props.accept_friend_request({
-        user_id: this.props.user._id,
+        user_id: this.props.user_id,
         contact_id: this.props._id,
       });
     }
 
     if (action === "DECLINE") {
       this.props.decline_friend_request({
-        user_id: this.props.user._id,
+        user_id: this.props.user_id,
         contact_id: this.props._id,
       });
     }
 
     if (action === "CANCEL") {
       this.props.unsend_friend_request({
-        user_id: this.props.user._id,
+        user_id: this.props.user_id,
         contact_id: this.props._id,
       });
-    }
-  }
-
-  status(contact) {
-    if (this.props.user.contacts.includes(contact._id)) {
-      return "Friends";
-    } else if (this.props.user.incoming_requests.includes(contact._id)) {
-      return "Incoming";
-    } else if (this.props.user.outgoing_requests.includes(contact._id)) {
-      return "Outgoing";
-    } else {
-      return "Unknown";
     }
   }
 
@@ -96,7 +83,7 @@ export default class ContactRow extends React.Component {
             className="btn btn-danger btn-sm"
             onClick={() => this.commitAction("CANCEL")}
           >
-            Cancel Request
+            CANCEL
           </button>
         );
       case "Unknown":
@@ -115,15 +102,22 @@ export default class ContactRow extends React.Component {
   }
 
   render() {
-    const contact_status = this.status(this.props._id);
+    const status = this.props.get_contact_status(this.props._id);
     return (
       <tr>
         <th scope="row">{this.props.index}</th>
         <td>{this.props.name}</td>
+        <td>
+          {this.props.privacy === "Private" ? (
+            <i className="material-icons">lock</i>
+          ) : (
+            <i className="material-icons">public</i>
+          )}
+        </td>
         <td>{this.props.gender}</td>
         <td>{this.props.country}</td>
-        <td>{contact_status}</td>
-        <td>{this.action(contact_status)}</td>
+        <td>{status}</td>
+        <td>{this.action(status)}</td>
       </tr>
     );
   }

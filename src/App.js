@@ -15,6 +15,7 @@ class App extends React.Component {
       loggedIn: false,
       route: "Login",
       registered: false,
+      contacts: [],
     };
     this.login = this.login.bind(this);
     this.signup = this.signup.bind(this);
@@ -28,21 +29,82 @@ class App extends React.Component {
     this.accept_friend_request = this.accept_friend_request.bind(this);
     this.decline_friend_request = this.decline_friend_request.bind(this);
     this.unsend_friend_request = this.unsend_friend_request.bind(this);
+    this.get_contact_status = this.get_contact_status.bind(this);
+    this.fetch_contacts = this.fetch_contacts.bind(this);
   }
 
   changeRoute(route) {
     this.setState({ route });
   }
 
-  send_friend_request(data) {}
+  get_contact_status(contact_id) {
+    if (this.state.user.contacts.includes(contact_id)) {
+      return "Contact";
+    } else if (this.state.user.incoming_requests.includes(contact_id)) {
+      return "Incoming";
+    } else if (this.state.user.outgoing_requests.includes(contact_id)) {
+      return "Outgoing";
+    } else {
+      return "Unknown";
+    }
+  }
 
-  remove_friend(data) {}
+  send_friend_request(data) {
+    console.log("sending friend request to ", data.contact_id);
+    const user = this.state.user;
+    user.outgoing_requests = [...user.outgoing_requests, data.contact_id];
+    this.setState({
+      user,
+    });
+    console.log(this.state.user);
+  }
 
-  accept_friend_request(data) {}
+  remove_friend(data) {
+    console.log("removing friend with id ", data.contact_id);
+    const user = this.state.user;
+    user.contacts = user.contacts.filter((id) => id !== data.contact_id);
+    this.setState({
+      user,
+    });
+  }
 
-  decline_friend_request(data) {}
+  accept_friend_request(data) {
+    console.log("accepting friend request from ", data.contact_id);
+    const user = this.state.user;
+    user.contacts = [...user.contacts, data.contact_id];
+    this.setState({
+      user,
+    });
+  }
 
-  unsend_friend_request(data) {}
+  decline_friend_request(data) {
+    console.log("declining friend request from ", data.contact_id);
+    const user = this.state.user;
+    user.incoming_requests = user.incoming_requests.filter(
+      (id) => id !== data.contact_id
+    );
+    this.setState({ user });
+  }
+
+  unsend_friend_request(data) {
+    console.log("unsending friend request to ", data.contact_id);
+    const user = this.state.user;
+    user.outgoing_requests = user.outgoing_requests.filter(
+      (id) => id !== data.contact_id
+    );
+    this.setState({ user });
+  }
+
+  async fetch_contacts(user_id) {
+    try {
+      const response = await fetch(`${this.props.api}/contacts/${user_id}`);
+      const result = await response.json();
+      console.log("CONTACTS", result);
+      this.setState({ contacts: result });
+    } catch (err) {
+      alert(err.message);
+    }
+  }
 
   renderRoute() {
     switch (this.state.route) {
@@ -62,13 +124,17 @@ class App extends React.Component {
       case "Contacts":
         return (
           <ContactTabs
-            user={this.state.user}
             api={this.props.api}
             send_friend_request={(data) => this.send_friend_request(data)}
             remove_friend={(data) => this.remove_friend(data)}
             accept_friend_request={(data) => this.accept_friend_request(data)}
             decline_friend_request={(data) => this.decline_friend_request(data)}
             unsend_friend_request={(data) => this.unsend_friend_request(data)}
+            user_id={this.state.user._id}
+            user_contacts={this.state.contacts}
+            get_contact_status={(contact_id) =>
+              this.get_contact_status(contact_id)
+            }
           />
         );
       case "Signup":
@@ -87,6 +153,7 @@ class App extends React.Component {
           const user = await response.json();
           this.props.socket.emit("register", user);
           console.log("registered", this.state.registered);
+          this.fetch_contacts(user._id);
           this.setState({
             user,
             loggedIn: true,
@@ -174,8 +241,15 @@ class App extends React.Component {
           route={this.state.route}
           changeRoute={(route) => this.changeRoute(route)}
         />
-        {this.state.notification && this.renderNotification()}
-        {this.renderRoute()}
+        {this.state.loggedIn &&
+          this.state.notification &&
+          this.renderNotification()}
+
+        {this.state.route === "Login" && this.renderRoute()}
+
+        {this.state.route !== "Login" &&
+          this.state.loggedIn &&
+          this.renderRoute()}
       </div>
     );
   }

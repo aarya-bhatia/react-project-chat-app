@@ -8,6 +8,7 @@ export default function ContactTable(props) {
         <tr>
           <th scope="col">#</th>
           <th scope="col">Name</th>
+          <th scope="col">Privacy</th>
           <th scope="col">Gender</th>
           <th scope="col">Country</th>
           <th scope="col">Status</th>
@@ -16,13 +17,14 @@ export default function ContactTable(props) {
       </thead>
       <tbody>
         {props.users.map((contact, index) => {
+          console.log(contact);
           return (
             <ContactRow
               index={index}
-              user={props.user}
               name={contact.name}
               country={contact.country}
               gender={contact.gender}
+              privacy={contact.privacy}
               _id={contact._id}
               key={contact._id}
               send_friend_request={(data) => props.send_friend_request(data)}
@@ -35,6 +37,10 @@ export default function ContactTable(props) {
               }
               unsend_friend_request={(data) =>
                 props.unsend_friend_request(data)
+              }
+              user_id={props.user_id}
+              get_contact_status={(contact_id) =>
+                props.get_contact_status(contact_id)
               }
             />
           );

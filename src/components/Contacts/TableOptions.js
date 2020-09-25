@@ -16,7 +16,17 @@ export default function TableOptions(props) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    props.fetch_users(query);
+    let queryResult = {};
+    if (query.name && query.name.length > 0) {
+      queryResult.name = query.name;
+    }
+    if (query.country && query.country.length > 0) {
+      queryResult.country = query.country;
+    }
+    if (query.gender && query.gender.length > 0) {
+      queryResult.gender = query.gender;
+    }
+    props.fetch_users(queryResult);
   }
 
   return (
