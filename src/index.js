@@ -7,10 +7,7 @@ import io from "socket.io-client";
 
 const api = "http://localhost:4000";
 
-window.onload = function () {
-  console.log("connecting");
-};
-
+console.log("connecting");
 const socket = io(api, { reconnectionAttempts: 5 });
 
 socket.on("connect", function () {

@@ -18,9 +18,14 @@ class Chat extends React.Component {
 
   async componentDidMount() {
     // register socket event listener
-    this.props.socket.on("new_message", (message) =>
-      this.addMessageToChat(message)
-    );
+    this.props.socket.on("new_message", (message) => {
+      this.props.pushNotification({
+        name: message.author_name,
+        time: message.time,
+        content: message.content,
+      });
+      this.addMessageToChat(message);
+    });
 
     // fetch chats from server
     try {

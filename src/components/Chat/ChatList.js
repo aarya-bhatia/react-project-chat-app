@@ -12,8 +12,9 @@ export default function ChatList({ user_id, chats, current_chat_id }) {
     }
 
     // date user last opened chat
-    const last_seen_at = chat.seenAt.find((entry) => entry.user_id === user_id)
-      .time;
+    const last_seen_at = chat.seenAt
+      .find((entry) => entry.user_id === user_id)
+      .time.toString();
 
     // counting unread messages
     let count = 0;
@@ -21,8 +22,10 @@ export default function ChatList({ user_id, chats, current_chat_id }) {
       console.log("counting");
       for (let i = 0; i < chat.messages.length; i++) {
         // if message was sent after user left the chat, then mark it as unread
-        if (chat.messages[i].date > last_seen_at) {
+        if (chat.messages[i].date.toString() > last_seen_at) {
           count++;
+        } else {
+          console.log("Message seen");
         }
       }
     }
